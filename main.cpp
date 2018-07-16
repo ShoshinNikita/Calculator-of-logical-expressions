@@ -8,13 +8,11 @@
 
 using namespace std;
 
-
 const char NEGATION_SIGN = '!'; // Negation (Инверсия)
 const char CONJUNCTION_SIGN = '*'; // Logical conjunction (Конъюнкция)
 const char DISJUNCTION_SIGN = '+'; // Logical disjunction (Дизъюнкция)
 const char CONDITIONAL_SIGN = '-'; // Material conditional (Импликация)
 const char EQUALITY_SIGN = '='; // Logical equality (Эквиваленция)
-
 
 void show_rules();
 string string_parsing(map<char, bool>&, const string&);
@@ -93,7 +91,7 @@ string string_parsing(map<char, bool>& symbols, const string& exp)
 		if (exp[0] == NEGATION_SIGN || exp[0] == DISJUNCTION_SIGN ||
 			exp[0] == CONJUNCTION_SIGN || exp[0] == CONDITIONAL_SIGN || 
 			exp[0] == EQUALITY_SIGN || exp[0] == '(' || exp[0] == ')') {
-			throw exception("Error: bad syntax (1)");
+			throw logic_error("Error: bad syntax (1)");
 		}
 	}
 	for (int i = 0; i < exp.size(); i++) {
@@ -107,13 +105,13 @@ string string_parsing(map<char, bool>& symbols, const string& exp)
 						brackets.pop();
 					}
 					else {
-						throw exception("Error: bad amount of brackets");
+						throw logic_error("Error: bad amount of brackets");
 					}
 				}
 				else if (exp[i] == CONJUNCTION_SIGN || exp[i] == DISJUNCTION_SIGN || exp[i] == CONDITIONAL_SIGN || exp[i] == EQUALITY_SIGN) {
 					if (! (i > 0 && (exp[i - 1] >= 65 && exp[i - 1] <= 90 || exp[i - 1] == NEGATION_SIGN || exp[i - 1] == ')') &&
 						i + 1 < exp.size() && (exp[i + 1] >= 65 && exp[i + 1] <= 90 || exp[i + 1] == NEGATION_SIGN || exp[i + 1] == '('))) {
-						throw exception("Error: bad syntax (2)");
+						throw logic_error("Error: bad syntax (2)");
 					}
 				}
 				else if (exp[i] == NEGATION_SIGN) {
@@ -121,32 +119,32 @@ string string_parsing(map<char, bool>& symbols, const string& exp)
 						if (! ((exp[i - 1] == CONJUNCTION_SIGN || exp[i - 1] == DISJUNCTION_SIGN || 
 							exp[i - 1] == CONDITIONAL_SIGN || exp[i - 1] == EQUALITY_SIGN || exp[i - 1] == '(') &&
 							i + 1 < exp.size() && (exp[i + 1] >= 65 && exp[i + 1] <= 90 || exp[i + 1] == '('))) {
-							throw exception("Error: bad syntax (3)");
+							throw logic_error("Error: bad syntax (3)");
 						}
 					}
 				}
 			}
 			else {
-				throw exception("Error: bad syntax (4)");
+				throw logic_error("Error: bad syntax (4)");
 			}
 		}
 		else {
 			// Check do letters go in a row
 			if (i > 0) {
 				if (exp[i - 1] >= 65 && exp[i - 1] <= 90) {
-					throw exception("Error: bad syntax (5)");
+					throw logic_error("Error: bad syntax (5)");
 				}
 			}
 			if (i + 1 < exp.size()) {
 				if (exp[i + 1] >= 65 && exp[i + 1] <= 90) {
-					throw exception("Error: bad syntax (6)");
+					throw logic_error("Error: bad syntax (6)");
 				}
 			}
 		}
 	}
 	// Ckeck brackets
 	if (!brackets.empty()) {
-		throw exception("Error: bad syntax (7)");
+		throw logic_error("Error: bad syntax (7)");
 	}
 
 	// Creating new expression (Reverse Polish notation)
