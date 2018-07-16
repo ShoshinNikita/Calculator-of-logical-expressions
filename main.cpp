@@ -9,11 +9,11 @@
 using namespace std;
 
 
-const char NEGATION_SIGN = '!'; // Negation (Инверсия)
-const char CONJUNCTION_SIGN = '*'; // Logical conjunction (Конъюнкция)
-const char DISJUNCTION_SIGN = '+'; // Logical disjunction (Дизъюнкция)
-const char CONDITIONAL_SIGN = '-'; // Material conditional (Импликация)
-const char EQUALITY_SIGN = '='; // Logical equality (Эквиваленция)
+const char NEGATION_SIGN = '!'; // Negation (РРЅРІРµСЂСЃРёСЏ)
+const char CONJUNCTION_SIGN = '*'; // Logical conjunction (РљРѕРЅСЉСЋРЅРєС†РёСЏ)
+const char DISJUNCTION_SIGN = '+'; // Logical disjunction (Р”РёР·СЉСЋРЅРєС†РёСЏ)
+const char CONDITIONAL_SIGN = '-'; // Material conditional (РРјРїР»РёРєР°С†РёСЏ)
+const char EQUALITY_SIGN = '='; // Logical equality (Р­РєРІРёРІР°Р»РµРЅС†РёСЏ)
 
 
 void show_rules();
@@ -335,9 +335,9 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 
 void show_rules()
 {
-	cout << "Negation (Инверсия) - '" << NEGATION_SIGN << "'\n"
-		<< "Logical conjunction (Конъюнкция) - '" << CONJUNCTION_SIGN << "'\n"
-		<< "Logical disjunction (Дизъюнкция) - '" << DISJUNCTION_SIGN << "'\n"
-		<< "Material conditional (Импликация) - '" << CONDITIONAL_SIGN << "'\n"
-		<< "Logical equality (Эквиваленция) - '" << EQUALITY_SIGN << "'\n";
+	cout << "Negation (РРЅРІРµСЂСЃРёСЏ) - '" << NEGATION_SIGN << "'\n"
+		<< "Logical conjunction (РљРѕРЅСЉСЋРЅРєС†РёСЏ) - '" << CONJUNCTION_SIGN << "'\n"
+		<< "Logical disjunction (Р”РёР·СЉСЋРЅРєС†РёСЏ) - '" << DISJUNCTION_SIGN << "'\n"
+		<< "Material conditional (РРјРїР»РёРєР°С†РёСЏ) - '" << CONDITIONAL_SIGN << "'\n"
+		<< "Logical equality (Р­РєРІРёРІР°Р»РµРЅС†РёСЏ) - '" << EQUALITY_SIGN << "'\n";
 }
