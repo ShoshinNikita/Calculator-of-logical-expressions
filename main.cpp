@@ -8,21 +8,24 @@
 
 using namespace std;
 
-const char NEGATION_SIGN = '!'; // Negation (Инверсия)
+const char NEGATION_SIGN = '!';    // Negation (Инверсия)
 const char CONJUNCTION_SIGN = '*'; // Logical conjunction (Конъюнкция)
 const char DISJUNCTION_SIGN = '+'; // Logical disjunction (Дизъюнкция)
 const char CONDITIONAL_SIGN = '-'; // Material conditional (Импликация)
-const char EQUALITY_SIGN = '='; // Logical equality (Эквиваленция)
+const char EQUALITY_SIGN = '=';    // Logical equality (Эквиваленция)
+
+struct result {
+	vector<char> permutation;
+	char         result;
+};
 
 void show_rules();
 string string_parsing(map<char, bool>&, const string&);
-vector<string> computation(map<char, bool>, const string&);
+vector<result> computation(map<char, bool>, const string&);
 
 ///////////////////////////////////////
 int main()
 {
-	setlocale(LC_ALL, "Russian");
-
 	string expression;
 	map<char, bool> symbols;
 	string new_expression;
@@ -33,10 +36,11 @@ int main()
 	while (true) {
 		cout << endl << endl;
 
-		// Getting right expression
+		// Getting a right expression
 		while (true) {
-			cout << "Enter your expression (for end enter 'exit'): ";
+			cout << "Enter your expression (or enter 'exit'): ";
 			cin >> expression;
+			// Transform to uppercase
 			transform(expression.begin(), expression.end(), expression.begin(), ::toupper);
 			if (expression == "EXIT") {
 				is_end = true;
@@ -49,7 +53,7 @@ int main()
 				break;
 			}
 			catch (exception& e) {
-				cout << e.what() << endl << endl;
+				cout << "[ERR] " << e.what() << endl << endl;
 			}
 		}
 		// For exit
@@ -57,16 +61,19 @@ int main()
 			break;
 		}
 
-		vector<string> results = computation(symbols, new_expression);
+		vector<result> results = computation(symbols, new_expression);
 
-		// Output symblos, expression and results
+		// Print symbols, expression and results
 		for (auto i : symbols) {
 			cout << i.first << " ";
 		}
 		cout << '\t' << expression << endl;
 
 		for (auto i : results) {
-			cout << i << endl;
+			for (auto j : i.permutation) {
+				cout << j << " ";
+			}
+			cout << "\t" << i.result << endl;
 		}
 
 		expression.clear();
@@ -74,12 +81,12 @@ int main()
 		new_expression.clear();
 	}
 
-	// End of program
 	return 0;
 }
 ///////////////////////////////////////
 
-// Continue work on checking correctness of expression
+// string_parsing checks an expression.
+// Ff there's any error, it throw an exception
 string string_parsing(map<char, bool>& symbols, const string& exp)
 {
 	stack<char> operations;
@@ -94,6 +101,7 @@ string string_parsing(map<char, bool>& symbols, const string& exp)
 			throw logic_error("Error: bad syntax (1)");
 		}
 	}
+	// Some magic
 	for (int i = 0; i < exp.size(); i++) {
 		if (exp[i] < 65 || exp[i] > 90) {
 			if (exp[i] == NEGATION_SIGN || exp[i] == DISJUNCTION_SIGN || exp[i] == CONJUNCTION_SIGN || exp[i] == CONDITIONAL_SIGN || exp[i] == EQUALITY_SIGN || exp[i] == '(' || exp[i] == ')') {
@@ -142,7 +150,7 @@ string string_parsing(map<char, bool>& symbols, const string& exp)
 			}
 		}
 	}
-	// Ckeck brackets
+	// Check brackets
 	if (!brackets.empty()) {
 		throw logic_error("Error: bad syntax (7)");
 	}
@@ -212,7 +220,7 @@ string string_parsing(map<char, bool>& symbols, const string& exp)
 	return new_expression;
 }
 
-vector<string> computation(map<char, bool> symbols, const string& expression)
+vector<result> computation(map<char, bool> symbols, const string& expression)
 {
 	int iteration_number = [symbols]() {
 		int num = 1;
@@ -220,7 +228,6 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 		return num;
 	}();
 
-	// For changing zeros and ones
 	string all_symbols = [symbols]() {
 		string temp;
 		for (auto i : symbols) {
@@ -229,6 +236,7 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 		return temp;
 	}();
 
+	// For getting of permutations 
 	auto dec_to_bin = [](int n, int size) {
 		string bin_number;
 		while (n != 0) {
@@ -239,12 +247,12 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 		return (string(size - bin_number.size(), '0') + bin_number);
 	};
 
-	vector<string> results;
+	vector<result> results;
 	stack<bool> counting_stack;
 	for (int i = 0; i < iteration_number; i++) {
-		// Changing zeros and ones
 		string bin_number = dec_to_bin(i, all_symbols.size());
 		// Change bool values in map according bin_number
+		// bin_number.size() == all_symbols.size()
 		for (int j = 0; j < all_symbols.size(); j++) {
 			symbols[all_symbols[j]] = bin_number[j] - '0';
 		}
@@ -257,17 +265,16 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 			else if (expression[i] == NEGATION_SIGN) {
 				bool a = counting_stack.top();
 				counting_stack.pop();
-				if (a) a = false;
-				else a = true;
+				a = !a;
 
 				counting_stack.push(a);
 			}
 			else if (expression[i] == CONJUNCTION_SIGN) {
-				bool b = counting_stack.top();
-				counting_stack.pop();
 				bool a = counting_stack.top();
 				counting_stack.pop();
-
+				bool b = counting_stack.top();
+				counting_stack.pop();
+				
 				if (a && b) {
 					counting_stack.push(true);
 				}
@@ -276,9 +283,9 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 				}
 			}
 			else if (expression[i] == DISJUNCTION_SIGN) {
-				bool b = counting_stack.top();
-				counting_stack.pop();
 				bool a = counting_stack.top();
+				counting_stack.pop();
+				bool b = counting_stack.top();
 				counting_stack.pop();
 
 				if (a || b) {
@@ -289,11 +296,11 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 				}
 			}
 			else if (expression[i] == CONDITIONAL_SIGN) {
-				bool b = counting_stack.top();
-				counting_stack.pop();
 				bool a = counting_stack.top();
 				counting_stack.pop();
-
+				bool b = counting_stack.top();
+				counting_stack.pop();
+				
 				if ((a && b) || (!a && !b) || (!a && b)) {
 					counting_stack.push(true);
 				}
@@ -302,11 +309,11 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 				}
 			}
 			else if (expression[i] == EQUALITY_SIGN) {
-				bool b = counting_stack.top();
-				counting_stack.pop();
 				bool a = counting_stack.top();
 				counting_stack.pop();
-
+				bool b = counting_stack.top();
+				counting_stack.pop();
+				
 				if ((a && b) || (!a && !b)) {
 					counting_stack.push(true);
 				}
@@ -317,13 +324,11 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 		}
 
 		// Creating string for returning
-		string temp;
+		result temp;
 		for (auto i : bin_number) {
-			temp.push_back(i);
-			temp.push_back(' ');
+			temp.permutation.push_back(i);
 		}
-		temp.push_back('\t');
-		temp.push_back(counting_stack.top() ? '1' : '0');
+		temp.result = (counting_stack.top() ? '1' : '0');
 		results.push_back(temp);
 		counting_stack.pop();
 	}
@@ -333,9 +338,9 @@ vector<string> computation(map<char, bool> symbols, const string& expression)
 
 void show_rules()
 {
-	cout << "Negation (Инверсия) - '" << NEGATION_SIGN << "'\n"
-		<< "Logical conjunction (Конъюнкция) - '" << CONJUNCTION_SIGN << "'\n"
-		<< "Logical disjunction (Дизъюнкция) - '" << DISJUNCTION_SIGN << "'\n"
-		<< "Material conditional (Импликация) - '" << CONDITIONAL_SIGN << "'\n"
-		<< "Logical equality (Эквиваленция) - '" << EQUALITY_SIGN << "'\n";
+	cout << "Negation - '" << NEGATION_SIGN << "'\n"
+		<< "Logical conjunction - '" << CONJUNCTION_SIGN << "'\n"
+		<< "Logical disjunction - '" << DISJUNCTION_SIGN << "'\n"
+		<< "Material conditional - '" << CONDITIONAL_SIGN << "'\n"
+		<< "Logical equality - '" << EQUALITY_SIGN << "'\n";
 }
